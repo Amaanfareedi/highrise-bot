@@ -8,7 +8,7 @@ class MyBot(BaseBot):
     async def on_user_join(self, user) -> None:
         pass
 
-    async def on_chat(self, user: User, message: str) -> None:
+    async def on_chat(self, user, message: str) -> None:
         if message.lower() == "!ping":
             await self.highrise.chat(f"Pong !")
         elif message.lower() == "!dance":
@@ -19,4 +19,4 @@ class MyBot(BaseBot):
 if __name__ == "__main__":
     import os
     asyncio.run(__main__.main(MyBot(), room_id="", token=""))
-            
+    
