@@ -18,5 +18,5 @@ class MyBot(BaseBot):
             await self.highrise.chat(f"Hello !")
 
 if __name__ == "__main__":
-    run_bot(MyBot())
-    
+    asyncio.run(run_bot(MyBot()))
+        
