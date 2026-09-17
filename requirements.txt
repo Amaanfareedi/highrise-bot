@@ -1,4 +1,4 @@
-highrise-lib
+highrise-bot-sdk==23.4.0
 aiohttp
-websockets
+
 
