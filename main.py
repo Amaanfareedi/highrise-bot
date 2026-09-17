@@ -1,6 +1,5 @@
 import asyncio
-from highrise import BaseBot
-from highrise.__main__ import main as run_bot
+from highrise import BaseBot, BotDefinition, highrise_main
 
 class MyBot(BaseBot):
     async def on_start(self, session_metadata) -> None:
@@ -18,5 +17,10 @@ class MyBot(BaseBot):
             await self.highrise.chat(f"Hello !")
 
 if __name__ == "__main__":
-    asyncio.run(run_bot([MyBot()]))
+    import os
+    room_id = os.getenv("ROOM_ID")
+    token = os.getenv("BOT_TOKEN")
+    
+    definitions = [BotDefinition(MyBot(), room_id, token)]
+    asyncio.run(highrise_main(definitions))
     
