@@ -36,4 +36,96 @@ EMOTE_LIST = [
 "comehere","backoff","spokkyswagger","yoinked","daydreaming","spiderman","rest","floss","sweetheartpose","celebration",
 "curiouser","reachforthestars","twerk","graceful","woah","laidback2","lust","mine","martialart","knocking",
 "popularvibe","frolicking","flex","swagbounce","cursing","headball","griddy","spiritual","blowkisses","hero",
-"trueheart","robotic","swinging","freshprince","ballet","breakdance","tk4","idletk6","selfiet
+"trueheart","robotic","swinging","freshprince","ballet","breakdance","tk4","idletk6","selfietime","yapping",
+"doomscroll","resttext","infinitescroll","wait","crouched","hccjet","crowdjammer","sweetjammer","uhmmm","zenmode",
+"hrstar","paparazzi","afk","moodswing","adoringfans","sixseven","nosixseven","scubadance","modelwalk","fitcheck",
+"sob","flexinghard","spilltea"
+]
+
+EMOTE_BY_NUM = {str(i+1): name for i, name in enumerate(EMOTE_LIST)}
+
+def get_emote_id(name):
+    name=name.lower()
+    return [name,f"emote-{name}",f"dance-{name}",f"idle-{name}",f"emote-looping-{name}"]
+
+class MyBot(BaseBot):
+    def __init__(self):
+        super().__init__()
+        self.loops={}
+        self.loop_all_task=None
+    async def on_start(self, session_metadata):
+        print(f"BOT ONLINE! {len(EMOTE_LIST)} emotes")
+        await self.highrise.chat(f"Bot Online! {len(EMOTE_LIST)} emotes!")
+    async def send_emote_try(self, emote_name, target_id):
+        for eid in get_emote_id(emote_name):
+            try:
+                await self.highrise.send_emote(eid, target_id)
+                return True
+            except: continue
+        return False
+    async def loop_emote(self, emote_name, target_id):
+        while True:
+            await self.send_emote_try(emote_name, target_id)
+            await asyncio.sleep(4.5)
+    async def on_chat(self, user, message: str):
+        msg=message.lower().strip()
+        if not msg: return
+        parts=msg.split()
+        cmd=parts[0]
+        if msg=="stop":
+            if user.id in self.loops:
+                self.loops[user.id].cancel()
+                del self.loops[user.id]
+                await self.highrise.chat(f"@{user.username} stopped")
+            return
+        if msg=="stoploopall":
+            if self.loop_all_task:
+                self.loop_all_task.cancel()
+                self.loop_all_task=None
+            for t in list(self.loops.values()): t.cancel()
+            self.loops.clear()
+            await self.highrise.chat("All loops stopped")
+            return
+        emote_name=None
+        if cmd in EMOTE_BY_NUM: emote_name=EMOTE_BY_NUM[cmd]
+        elif cmd in EMOTE_LIST: emote_name=cmd
+        elif len(parts)>=2 and (parts[0] in EMOTE_LIST or parts[0] in EMOTE_BY_NUM):
+             if "@" in msg or parts[1]=="all":
+                 emote_name=EMOTE_BY_NUM.get(parts[0],parts[0])
+        if "@" in msg and emote_name:
+            try:
+                target_username=msg.split("@")[-1].split()[0]
+                room_users=(await self.highrise.get_room_users()).content
+                target=next((u for u,_ in room_users if u.username.lower()==target_username.lower()),None)
+                if target:
+                    if user.id in self.loops: self.loops[user.id].cancel()
+                    task=asyncio.create_task(self.loop_emote(emote_name,target.id))
+                    self.loops[user.id]=task
+                    await self.highrise.chat(f"@{user.username} -> @{target_username} : {emote_name}")
+            except: pass
+            return
+        if msg.endswith(" all") and emote_name:
+            try:
+                room_users=(await self.highrise.get_room_users()).content
+                for u,_ in room_users: await self.send_emote_try(emote_name,u.id)
+                await self.highrise.chat(f"All: {emote_name} by @{user.username}")
+            except: pass
+            return
+        if msg.startswith("loopall "):
+            emote_part=msg.replace("loopall ","").strip()
+            emote_name2=EMOTE_BY_NUM.get(emote_part,emote_part)
+            async def loop_all():
+                while True:
+                    try:
+                        room_users=(await self.highrise.get_room_users()).content
+                        for u,_ in room_users: await self.send_emote_try(emote_name2,u.id)
+                    except: pass
+                    await asyncio.sleep(5)
+            if self.loop_all_task: self.loop_all_task.cancel()
+            self.loop_all_task=asyncio.create_task(loop_all())
+            await self.highrise.chat(f"Loop All: {emote_name2}")
+            return
+        if emote_name and len(parts)==1:
+            if user.id in self.loops: self.loops[user.id].cancel()
+            task=asyncio.create_task(self.loop_emote(emote_name,user.id))
+            self.loops[user.id]=task
