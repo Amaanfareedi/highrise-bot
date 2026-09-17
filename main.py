@@ -1,6 +1,6 @@
 import os
-import asyncio
-from highrise import BaseBot, BotDefinition, highrise_main
+import subprocess
+from highrise import BaseBot
 
 class MyBot(BaseBot):
     async def on_start(self, session_metadata) -> None:
@@ -21,10 +21,6 @@ if __name__ == "__main__":
     room_id = os.getenv("ROOM_ID")
     token = os.getenv("BOT_TOKEN")
     
-    # Check if variables exist
-    if not room_id or not token:
-        print("Error: ROOM_ID or BOT_TOKEN is missing in environment variables!")
-    else:
-        definitions = [BotDefinition(MyBot(), room_id, token)]
-        asyncio.run(highrise_main(definitions))
-        
+    # Subprocess ke zariye highrise cli command ko trigger kar rahe hain
+    subprocess.run(["highrise", "main.py", "MyBot", "--room-id", room_id, "--token", token])
+    
