@@ -1,5 +1,4 @@
-import asyncio
-from highrise import BaseBot, BotDefinition, highrise_main
+from highrise import BaseBot
 
 class MyBot(BaseBot):
     async def on_start(self, session_metadata) -> None:
@@ -15,12 +14,4 @@ class MyBot(BaseBot):
             await self.highrise.send_emote("emote-kiss")
         elif message.lower() == "!hi":
             await self.highrise.chat(f"Hello !")
-
-if __name__ == "__main__":
-    import os
-    room_id = os.getenv("ROOM_ID")
-    token = os.getenv("BOT_TOKEN")
-    
-    definitions = [BotDefinition(MyBot(), room_id, token)]
-    asyncio.run(highrise_main(definitions))
-    
+            
