@@ -1,3 +1,11 @@
+import os, threading, http.server, socketserver
+def run_dummy():
+    port = int(os.environ.get("PORT", 10000))
+    handler = http.server.SimpleHTTPRequestHandler
+    with socketserver.TCPServer(("", port), handler) as httpd:
+        httpd.serve_forever()
+threading.Thread(target=run_dummy, daemon=True).start()
+
 from highrise import BaseBot
 import asyncio
 
@@ -43,7 +51,6 @@ EMOTE_LIST = [
 ]
 
 EMOTE_BY_NUM = {str(i+1): name for i, name in enumerate(EMOTE_LIST)}
-
 def get_emote_id(name):
     name=name.lower()
     return [name,f"emote-{name}",f"dance-{name}",f"idle-{name}",f"emote-looping-{name}"]
@@ -101,14 +108,12 @@ class MyBot(BaseBot):
                     if user.id in self.loops: self.loops[user.id].cancel()
                     task=asyncio.create_task(self.loop_emote(emote_name,target.id))
                     self.loops[user.id]=task
-                    await self.highrise.chat(f"@{user.username} -> @{target_username} : {emote_name}")
             except: pass
             return
         if msg.endswith(" all") and emote_name:
             try:
                 room_users=(await self.highrise.get_room_users()).content
                 for u,_ in room_users: await self.send_emote_try(emote_name,u.id)
-                await self.highrise.chat(f"All: {emote_name} by @{user.username}")
             except: pass
             return
         if msg.startswith("loopall "):
@@ -123,7 +128,6 @@ class MyBot(BaseBot):
                     await asyncio.sleep(5)
             if self.loop_all_task: self.loop_all_task.cancel()
             self.loop_all_task=asyncio.create_task(loop_all())
-            await self.highrise.chat(f"Loop All: {emote_name2}")
             return
         if emote_name and len(parts)==1:
             if user.id in self.loops: self.loops[user.id].cancel()
