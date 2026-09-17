@@ -1,4 +1,6 @@
+highrise-bot-sdk --only-binary=:all:
 aiohttp
+
 
 
 
