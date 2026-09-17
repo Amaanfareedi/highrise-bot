@@ -18,5 +18,7 @@ class MyBot(BaseBot):
 
 if __name__ == "__main__":
     import os
-    asyncio.run(__main__.main(MyBot(), room_id="", token=""))
+    room_id = os.getenv("ROOM_ID")
+    token = os.getenv("BOT_TOKEN")
+    asyncio.run(__main__.main(MyBot(), room_id, token))
     
