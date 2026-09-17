@@ -1,18 +1,39 @@
 from highrise import BaseBot
+import asyncio
 
-class MyBot(BaseBot):
-    async def on_start(self, session_metadata) -> None:
-        print("Bot Online! Connected to room")
-        await self.highrise.chat("Bot Online! Commands: !ping, !hi, !dance")
-
-    async def on_user_join(self, user) -> None:
-        await self.highrise.chat(f"Welcome {user.username}!")
-
-    async def on_chat(self, user, message: str) -> None:
-        msg = message.lower().strip()
-        if msg == "!ping":
-            await self.highrise.chat(f"Pong @{user.username}")
-        elif msg == "!hi":
-            await self.highrise.chat(f"Hello @{user.username}!")
-        elif msg == "!dance":
-            await self.highrise.send_emote("dance-tiktok", user.id)
+EMOTE_LIST = [
+"kiss","laugh","sit","fairytwirl","fairyfloat","launch","cutesalute","atattention","tiktok","smooch",
+"pushit","foryou","touch","kawaii","repose","sleigh","hyped","jingle","gottago","timejump",
+"scritchy","bitnervous","iceskating","partytime","arabesque","bashful","revelations","watchyourback","creepypuppet","saunter",
+"surprise","celebrate","penguin","boxer","airguitar","stargaze","ditzy","uwu","fashion","icecream",
+"sayso","zombierun","astronaut","punk","zerogravity","beautiful","casual","wink","fightme","icon",
+"flirtywave","greedy","viralgroove","weird","shuffle","gagging","raise","savage","blackpink","model",
+"dontstartnow","pennywise","bow","russian","curtsy","snowball","snowangel","charging","letsgoshopping","confused",
+"enthused","telekinesis","float","teleporting","swordfight","maniac","energyball","worm","singalong","frog",
+"lambi","macarena","shakehead","nod","hello","runhop","donttouch","outfit","thumbsup","passionatesmooch",
+"pose12","miningfail","shy","runforward","fishingpull","idlespace","thewave","tiktok5","fading","dinner",
+"winkpose","opera","hiphopdance","angry","tiktok15","tiktok6","breakscreen","juggling","thief","sheephop",
+"walkforward","shocked","flirt","gooey","outfit2","fireworks","musclepose","rough","fishingidle","tk7",
+"dropped","miningsuccess","oops","wavey","anime","receivehappy","cold","twitched","fishingcast","surf",
+"shush","handwalk","kid","pokedance","pose11","sitchair","tiktok16","shuffledance","tiktok3","headless",
+"tiktok1","cartwheel","tired","electrified","dramatic","hopscotch","purr","armcannon","zombie","cutee",
+"hot","pose8","miningmine","fishingpullsmall","tiktok7","cold2","ghostfloat","relaxed","attentive","posh",
+"shrink","sleepy","pouty","tired2","taploop","shy2","bummed","chillin","annoyed","aerobics","ponder",
+"heropose","relaxing","cozynap","feelbeat","irritated","ibelieve","think","theatrical","tapdance","superrun",
+"superpunch","sumo","thumbsuck","splits","secretshake","ropepull","roll","rofl","robotdance","rainbow",
+"propose","peekaboo","peace","panic","ninjarun","nightfever","monsterfail","levelup","amused","superkick",
+"jump","judochop","jetpackfly","hugyourself","harlemshake","happyy","handstand","moonwalk","gangnam","faint",
+"clumsy","fall","exasperated","elbowsbump","disco","blastoff","faintdrop","collapse","revival","dab",
+"bunnyhop","boo","homerun","apart","point","sneeze","smirk","sick","gasp","punch","pray","stinky",
+"naughty","mindblown","lying","levitate","firelunge","giveup","stunned","clap","arrogance","voguehands",
+"smoothwalk","ringonit","orangejuice","rockout","handsinair","duckwalk","pushups","salutee","ghost","heartshape",
+"hug","eyeroll","embarrassed","sexydance","puppet","fightidle","frustrated","stargazing","slap","facepalm",
+"hearteyes","heartfingers","trampoline","howl1","howl2","laidback","hipshake","celebrating","celebrateidle","swingnet3",
+"swingsneak","swingnet2","swingnet1","riflethrow","coolguy","disappointed","laid2","fruity","warrior3","warrior2",
+"treepose","sugarstun","novabop","blossomreach","sakurastep","petalperch","runningman","yogasurprise","midnightpoise","midnightstrut",
+"midnightallure","springsun","bloomflutter","bloomcharm","bloomradiance","foldarmfly","divamoment","float2","rainstruck1","rainstruck2",
+"chaoscutie","sweettease","sweetstrike","sweetfix","sweetlure","justvibing","cheer","magnetic","hotcocoa","silentjudging",
+"comehere","backoff","spokkyswagger","yoinked","daydreaming","spiderman","rest","floss","sweetheartpose","celebration",
+"curiouser","reachforthestars","twerk","graceful","woah","laidback2","lust","mine","martialart","knocking",
+"popularvibe","frolicking","flex","swagbounce","cursing","headball","griddy","spiritual","blowkisses","hero",
+"trueheart","robotic","swinging","freshprince","ballet","breakdance","tk4","idletk6","selfiet
