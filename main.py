@@ -1,6 +1,6 @@
 import os
 import asyncio
-from highrise import BaseBot, __main__
+from highrise import BaseBot, BotDefinition, highrise_main
 
 class MyBot(BaseBot):
     async def on_start(self, session_metadata) -> None:
@@ -21,10 +21,10 @@ if __name__ == "__main__":
     room_id = os.getenv("ROOM_ID")
     token = os.getenv("BOT_TOKEN")
     
-    # Highrise ke standard CLI command ko python ke andar se chalane ke liye
-    import sys
-    from highrise.__main__ import main as highrise_cli
-    
-    sys.argv = ["highrise", "main:MyBot", "--room-id", room_id, "--token", token]
-    asyncio.run(highrise_cli())
-            
+    # Check if variables exist
+    if not room_id or not token:
+        print("Error: ROOM_ID or BOT_TOKEN is missing in environment variables!")
+    else:
+        definitions = [BotDefinition(MyBot(), room_id, token)]
+        asyncio.run(highrise_main(definitions))
+        
