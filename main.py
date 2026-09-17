@@ -9,7 +9,8 @@ class MyBot(BaseBot):
         # Greeter Feature: Jaise hi koi room mein aaye, welcome karo
         await self.highrise.chat(f"Welcome to the room, {user.username}! 🎉")
         
-    async def on_chat(self, user:- user, message: str) -> None:
+        async def on_chat(self, user: User, message: str) -> None:
+            
         # Entertainment & Moderation Feature
         if message.lower() == "!ping":
             await self.highrise.chat(f"Pong! 🏓 {user.username}")
