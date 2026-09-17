@@ -1,4 +1,3 @@
-import os
 import subprocess
 from highrise import BaseBot
 
@@ -18,9 +17,6 @@ class MyBot(BaseBot):
             await self.highrise.chat(f"Hello !")
 
 if __name__ == "__main__":
-    room_id = os.getenv("ROOM_ID")
-    token = os.getenv("BOT_TOKEN")
-    
-    # Subprocess ke zariye highrise cli command ko trigger kar rahe hain
-    subprocess.run(["highrise", "main.py", "MyBot", "--room-id", room_id, "--token", token])
-    
+    # Highrise CLI automatically environment variables (BOT_TOKEN, ROOM_ID) read kar lega
+    subprocess.run(["highrise", "main.py", "MyBot"])
+            
